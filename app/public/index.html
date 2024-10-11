@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Stream Control</title>
+</head>
+<body>
+    <h1>RTMP Video Stream</h1>
+
+    <video id="streamPlayer" controls autoplay width="device-width" height="400">
+        <source src="http://localhost:8080/hls/stream.m3u8" type="application/x-mpegURL">
+        Your browser does not support HLS streaming.
+    </video>
+
+    <div>
+        <button onclick="startStream()">Start Stream</button>
+        <button onclick="stopStream()">Stop Stream</button>
+        <button onclick="archiveStream()">Archive Stream</button>
+    </div>
+
+    <script>
+        function startStream() {
+            // Start FFmpeg via an API or command
+            fetch('/start-stream')
+                .then(response => response.json())
+                .then(data => console.log("Stream started", data))
+                .catch(error => console.error("Error starting stream", error));
+        }
+
+        function stopStream() {
+            // Stop FFmpeg via an API or command
+            fetch('/stop-stream')
+                .then(response => response.json())
+                .then(data => console.log("Stream stopped", data))
+                .catch(error => console.error("Error stopping stream", error));
+        }
+
+        function archiveStream() {
+            // This can handle archiving logic to ensure the stream is saved
+            fetch('/archive-stream')
+                .then(response => response.json())
+                .then(data => console.log("Stream archived", data))
+                .catch(error => console.error("Error archiving stream", error));
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Archive</title>
+
+    <!-- Tailwind CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+    <!-- Video.js CSS -->
+    <link href="https://vjs.zencdn.net/7.11.4/video-js.css" rel="stylesheet" />
+
+    <!-- Video.js Library -->
+    <script src="https://vjs.zencdn.net/7.11.4/video.min.js"></script>
+
+    <!-- Video.js HLS Support -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-hls/5.15.0/videojs-contrib-hls.min.js"></script>
+
+    <style>
+        body {
+            background-color: #f9fafb;
+        }
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 */
+            padding-top: 25px;
+            height: 0;
+        }
+        .video-container video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-start min-h-screen p-4">
+
+    <h1 class="text-4xl font-bold mb-6">Video Archive</h1>
+
+    <div id="videoList" class="w-full max-w-2xl mb-8">
+        <h2 class="text-2xl font-semibold mb-4">Recorded Videos</h2>
+        <ul id="videos" class="space-y-2">
+            <!-- Video list items will be populated here -->
+        </ul>
+    </div>
+
+    <div class="video-container w-full max-w-2xl mb-8">
+        <video id="videoPlayer" class="video-js vjs-default-skin" controls preload="auto">
+            <source id="videoSource" src="" type="application/x-mpegURL">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+    <div class="space-x-4">
+        <button id="startBtn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+            Start Stream
+        </button>
+        <button id="stopBtn" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+            Stop Stream
+        </button>
+        <button id="archiveBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            Archive Stream
+        </button>
+    </div>
+
+    <script>
+        const videoList = document.getElementById('videos');
+        const videoPlayer = videojs('videoPlayer');
+        const videoSource = document.getElementById('videoSource');
+
+        // Backend API URL
+        const API_URL = 'http://localhost:5000';
+
+        // Fetch the list of available videos from the server
+        async function fetchVideoList() {
+            try {
+                const response = await fetch(`${API_URL}/list-videos`);
+                const videos = await response.json();
+
+                // Clear existing list
+                videoList.innerHTML = '';
+
+                // Populate the video list
+                videos.forEach(video => {
+                    const listItem = document.createElement('li');
+                    const button = document.createElement('button');
+                    button.className = 'w-full text-left px-4 py-2 bg-white border rounded hover:bg-gray-100';
+                    button.textContent = video;
+                    button.onclick = () => playVideo(video);
+                    listItem.appendChild(button);
+                    videoList.appendChild(listItem);
+                });
+            } catch (error) {
+                console.error('Error fetching video list:', error);
+            }
+        }
+
+        // Function to play the selected video
+        function playVideo(video) {
+            videoSource.src = `${API_URL}/videos/${encodeURIComponent(video)}`;
+            videoPlayer.load();
+            videoPlayer.play();
+        }
+
+        // Function to start the stream
+        async function startStream() {
+            try {
+                const response = await fetch(`${API_URL}/start-stream`, { method: 'POST' });
+                const data = await response.json();
+                console.log('Stream started:', data);
+                alert('Stream started successfully!');
+            } catch (error) {
+                console.error('Error starting stream:', error);
+                alert('Failed to start the stream.');
+            }
+        }
+
+        // Function to stop the stream
+        async function stopStream() {
+            try {
+                const response = await fetch(`${API_URL}/stop-stream`, { method: 'POST' });
+                const data = await response.json();
+                console.log('Stream stopped:', data);
+                alert('Stream stopped successfully!');
+            } catch (error) {
+                console.error('Error stopping stream:', error);
+                alert('Failed to stop the stream.');
+            }
+        }
+
+        // Function to archive the stream
+        async function archiveStream() {
+            try {
+                const response = await fetch(`${API_URL}/archive-stream`, { method: 'POST' });
+                const data = await response.json();
+                console.log('Stream archived:', data);
+                alert('Stream archived successfully!');
+            } catch (error) {
+                console.error('Error archiving stream:', error);
+                alert('Failed to archive the stream.');
+            }
+        }
+
+        // Event listeners for buttons
+        document.getElementById('startBtn').addEventListener('click', startStream);
+        document.getElementById('stopBtn').addEventListener('click', stopStream);
+        document.getElementById('archiveBtn').addEventListener('click', archiveStream);
+
+        // Fetch the video list when the page loads
+        window.onload = fetchVideoList;
+    </script>
+</body>
+</html>

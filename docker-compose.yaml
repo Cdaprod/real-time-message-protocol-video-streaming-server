@@ -1,0 +1,11 @@
+version: '3'
+services:
+  rtmp-server:
+    build: ./app
+    ports:
+      - "1935:1935"
+      - "8080:80"
+      - "5000:5000"
+    volumes:
+      - /mnt/nas:/mnt/nas
+    restart: unless-stopped
